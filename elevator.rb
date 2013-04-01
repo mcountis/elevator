@@ -36,11 +36,17 @@ class Elevator
   private
   
   def add_destination floor,callback
-    @queue.push([floor,callback])
+    if @queue.empty?
+      @queue[0] = []
+    end
+    @queue[0].push([floor,callback])
   end
   
   def add_pickup floor,direction,callback
-    @queue.push([floor,callback])
+    if @queue.empty?
+      @queue[0] = []
+    end    
+    @queue[0].push([floor,callback])
   end
   
   def move_to floor
@@ -50,12 +56,16 @@ class Elevator
   def process_queue
     
     while !@queue.empty? do
-      action = @queue.shift
+      stop = @queue[0].shift
       
-      move_to(action[0])
+      move_to(stop[0])
       
-      if action[1]
-        action[1].call(self)
+      if stop[1]
+        stop[1].call(self)
+      end
+      
+      if @queue[0].empty?
+        @queue.shift
       end
             
     end
