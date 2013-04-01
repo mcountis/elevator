@@ -41,7 +41,7 @@ describe Elevator do
       it "denies attempt to call floor" do
         origin_floor = @floors.last + 1
         direction = -1
-        @elevator.call(origin_floor,direction,@floors.first).should be_false
+        @elevator.call(origin_floor,direction).should be_false
       end
     end
         
@@ -49,38 +49,71 @@ describe Elevator do
       it "visits origin floor" do
         origin_floor = 35
         requested_direction = -1
+        
         floor_was_visited = false
-        @elevator.call(origin_floor,requested_direction,@floors.first) do
+        
+        @elevator.call(origin_floor,requested_direction) do |e|
           floor_was_visited = true
         end
+        
+        @elevator.run
+        
         floor_was_visited.should be_true
+        
       end
     end
     
   end
   
-  # describe "#request" do
-  #   
-  #   before :each do
-  #     @origin_floor = 35
-  #     @direction = -1
-  #     @elevator.call(@origin_floor,@direction)
-  #   end
-  #   
-  #   context "with invalid destination" do
-  #     it "denies request by returning false" do
-  #       @elevator.request(@floors.first - 1).should be_false
-  #     end
-  #   end
-  #   
-  #   context "with valid destination" do
-  #     it "visits destination" do
-  #       destination = 1
-  #       @elevator.request(destination)
-  #       @elevator.current_floor.should eq(destination)
-  #     end
-  #   end
-  #   
-  # end
+  describe "#request" do
+    
+    context "with invalid destination" do
+      it "denies request by returning false" do
+        @elevator.request(@floors.first - 1).should be_false
+      end
+    end
+    
+    context "with valid destination" do
+      it "visits destination" do
+        destination = @floors.first
+        destination_reached = false
+        @elevator.request(destination) do |e|
+          destination_reached = true
+        end
+        
+        @elevator.run
+        
+        destination_reached.should be_true
+      end
+      
+    end
+    
+  end
+  
+  describe "#call then #request" do
+    
+    it "visits both call floor and destination floor" do
+      origin = Random.rand(@floors)
+      destination = Random.rand(@floors)
+      direction = destination - origin
+      direction = direction / direction.abs
+      
+      origin_was_visited = false
+      destination_was_visited = false
+      
+      @elevator.call(origin,direction) do |e|
+        origin_was_visited = e.current_floor == origin
+        e.request(destination) do |e|
+          destination_was_visited = e.current_floor == destination
+        end
+      end
+      
+      @elevator.run
+      
+      origin_was_visited.should be_true
+      destination_was_visited.should be_true
+    end
+    
+  end
     
 end
