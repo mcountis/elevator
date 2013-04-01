@@ -114,6 +114,38 @@ describe Elevator do
       destination_was_visited.should be_true
     end
     
+    it "queues up multiple call calls and visits all call floors and destination floors" do
+      
+      all_origins_were_visited = true
+      all_destinations_were_visited = true
+      
+      100.times do
+        
+        origin = Random.rand(@floors)
+        destination = Random.rand(@floors)
+        direction = destination - origin
+        direction = direction / direction.abs
+
+        @elevator.call(origin,direction) do |e|
+          all_origins_were_visited = all_origins_were_visited && e.current_floor == origin
+          e.request(destination) do |e|
+            all_destinations_were_visited = all_destinations_were_visited && e.current_floor == destination
+          end
+        end
+        
+        if !(all_destinations_were_visited && all_origins_were_visited)
+          break
+        end
+        
+      end
+      
+      @elevator.run
+      
+      all_origins_were_visited.should be_true
+      all_destinations_were_visited.should be_true
+      
+    end
+    
   end
     
 end
