@@ -1,4 +1,4 @@
-require 'elevator'
+require_relative '../elevator.rb'
 
 describe Elevator do
   
